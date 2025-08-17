@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WikiBox Ultimate Retro 🎉</title>
+<style>
+/* ====== Base Styles ====== */
+html,body{margin:0;padding:0;height:100%;font-family:'Geneva','Arial',sans-serif;background:#c0c0c0;overflow:hidden;}
+.window{display:flex;flex-direction:row;height:100%;background:#e0e0e0;border:4px solid #000;box-shadow:8px 8px 20px #666 inset, -4px -4px 12px #fff inset;overflow:hidden;position:relative;transition:all 0.4s;}
+#sidebar{width:260px;background:#d0d0d0;border-right:3px solid #888;padding:10px;transition:left 0.35s;overflow-y:auto;flex-shrink:0;position:absolute;top:0;bottom:0;left:-260px;z-index:50;box-shadow:inset -5px 0 8px rgba(0,0,0,0.3);}
+#sidebar h4{margin:8px 0 6px 0;font-size:12px;text-shadow:2px 2px #fff;cursor:pointer;user-select:none;}
+#sidebar button,#sidebar select,#sidebar input[type="text"]{display:block;width:100%;margin-bottom:6px;padding:6px;border:2px solid #888;background:#f0f0f0;font-size:12px;cursor:pointer;box-shadow:3px 3px 6px #aaa inset, -2px -2px 3px #fff inset;transition:0.2s;}
+#sidebar button:hover,#sidebar select:hover,#sidebar input[type="text"]:hover{background:#e0e0e0;transform:scale(1.06) rotate(-2deg);box-shadow:4px 4px 8px #888 inset, -2px -2px 4px #fff inset;}
+#folderTab{position:absolute;top:10px;left:0;width:40px;height:40px;background:#ffcc00;border:4px solid #000;border-radius:12px 0 0 12px;cursor:pointer;display:flex;justify-content:center;align-items:center;font-weight:bold;font-size:20px;color:black;user-select:none;z-index:60;transition:0.2s;box-shadow:5px 5px 12px #888;}
+#folderTab:hover{transform:scale(1.2) rotate(12deg);background:#ffdd33;box-shadow:5px 5px 16px #555;}
+.content-container{flex:1;display:flex;flex-direction:column;position:relative;height:100%;overflow:hidden;}
+.title-bar{background:linear-gradient(to right,#000080,#0000b0);color:white;padding:6px 10px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;text-shadow:2px 2px #000;box-shadow:3px 3px 8px #555 inset;}
+.clock{font-size:14px;cursor:pointer;}
+.address-bar{display:flex;margin:8px;gap:4px;flex-wrap:wrap;position:relative;}
+.address-bar input{flex:1;padding:6px 8px;font-size:13px;border:2px solid #888;box-shadow:2px 2px 5px #aaa inset,-1px -1px 2px #fff inset;}
+.address-bar button{padding:6px 10px;border:2px solid #888;background:#f0f0f0;box-shadow:3px 3px 6px #aaa inset,-2px -2px 3px #fff inset;cursor:pointer;}
+.tabs{display:flex;gap:6px;margin:8px;flex-wrap:wrap;overflow-x:auto;}
+.tab{padding:4px 8px;background:#f0f0f0;border:2px solid #888;cursor:pointer;transition:0.2s;display:flex;align-items:center;gap:6px;box-shadow:3px 3px 6px #aaa inset, -2px -2px 3px #fff inset;white-space:nowrap;max-width:220px;}
+.tab:hover{background:#d0d0d0;transform:translateY(-2px) scale(1.06) rotate(-1deg);}
+.tab.active{background:#c0c0c0;font-weight:bold;box-shadow:inset 3px 3px 8px #fff;}
+.close-tab{color:red;cursor:pointer;font-weight:bold;font-size:16px;line-height:1;}
+.content{flex:1;padding:12px;overflow-y:auto;background:white;border:2px solid #888;margin:8px;transition:0.3s;box-shadow:inset 5px 5px 12px #ccc, -3px -3px 6px #fff;position:relative;transform-origin:top left;}
+.result{margin-bottom:14px;border-bottom:2px solid #ccc;padding-bottom:8px;transition:0.2s;display:flex;gap:12px;align-items:flex-start;cursor:pointer;}
+.result:hover{background:#f9f9f9;transform:translateX(4px) rotate(-1deg) scale(1.02);box-shadow:3px 3px 8px #aaa;}
+.result img{width:160px;max-width:160px;height:auto;border:2px solid #888;box-shadow:4px 4px 10px #aaa;object-fit:cover;background:#f4f4f4;}
+.result h3{margin:0 0 6px 0;font-size:15px;}
+.result p{font-size:13px;margin:0;}
+.suggestion-box{border:2px solid #888;background:white;position:absolute;z-index:100;max-height:200px;overflow-y:auto;display:none;font-size:12px;top:40px;left:0;right:100px;box-shadow:3px 3px 8px #888;}
+.suggestion-item{padding:6px 8px;cursor:pointer;border-bottom:1px dashed #ddd;}
+.suggestion-item:hover{background:#c0c0c0;transform:scale(1.02);}
+.start-page{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:flex-start;padding:12px;transition:0.3s;flex:1;overflow-y:auto;background-size:cover;background-position:center;}
+.start-icon{width:130px;height:140px;background:#f0f0f0;border:2px solid #888;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;font-size:12px;transition:0.25s;text-align:center;overflow:hidden;box-shadow:5px 5px 12px #aaa inset,2px 2px 4px #fff;}
+.start-icon img{width:100%;height:90px;object-fit:cover;border-bottom:2px solid #888;background:#fafafa;}
+.start-icon span{padding:6px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;}
+.start-icon:hover{transform:translateY(-6px) scale(1.08) rotate(-3deg);box-shadow:6px 6px 14px rgba(0,0,0,0.35);}
+footer{text-align:center;font-size:13px;margin-top:0;padding:6px;background:#e0e0e0;border-top:3px solid #888;transition:0.3s;box-shadow:inset 2px 2px 5px #fff;}
+footer:hover{background:#d0d0d0;}
+@media (max-width: 768px){
+  .window{flex-direction:column;}
+  #sidebar{position:relative;width:100%;height:auto;left:0;display:none;}
+  #folderTab{display:none;}
+  .tabs{overflow-x:auto;}
+}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div id="sidebar">
+    <h4 onclick="toggleSection(this)">Tabs 📑</h4>
+    <div id="tabControls">
+      <button onclick="newTab()">New Tab</button>
+      <button onclick="closeAllTabs()">Close All Tabs</button>
+    </div>
+
+    <h4 onclick="toggleSection(this)">Zoom & Text 🔍</h4>
+    <div id="zoomControls">
+      <button onclick="zoomIn()">A+</button>
+      <button onclick="zoomOut()">A-</button>
+      <button onclick="resetZoom()">Reset Zoom</button>
+      <select id="textSize" onchange="setTextSize(this.value)">
+        <option value="small">Small</option>
+        <option value="medium" selected>Medium</option>
+        <option value="large">Large</option>
+      </select>
+      <button onclick="resetTextSize()">Reset Text</button>
+    </div>
+
+    <h4 onclick="toggleSection(this)">Search & History 🔎</h4>
+    <div id="searchControls">
+      <button onclick="toggleHistory()">Toggle History</button>
+      <button onclick="pinCurrentSearch()">Pin Search</button>
+      <button onclick="setStartPage()">Set Start Page</button>
+      <button onclick="goToStartPage()">★ Start Page</button>
+      <h4>Pinned Searches</h4><div id="pinnedList"></div>
+      <h4>History</h4><div id="historyList"></div>
+    </div>
+
+    <h4 onclick="toggleSection(this)">Fun Buttons 🎉</h4>
+    <div id="funButtons">
+      <button onclick="showJoke()">Random Joke 😂</button>
+      <button onclick="rollDice()">Roll Dice 🎲</button>
+      <button onclick="showFact()">Random Fact 🧠</button>
+      <button onclick="clickCounter()">Click Game 🖱️</button>
+      <button onclick="confettiBlast()">Confetti 🎊</button>
+    </div>
+  </div>
+
+  <div id="folderTab" title="Toggle Sidebar">📁</div>
+
+  <div class="content-container">
+    <div class="title-bar">
+      WikiBox Ultimate 🎈
+      <span class="clock" id="clock">--:--:--</span>
+    </div>
+    <div class="address-bar">
+      <input type="text" id="searchInput" placeholder="Search Wikipedia..." autocomplete="off">
+      <button id="searchBtn">Search</button>
+      <div class="suggestion-box" id="suggestionBox"></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<footer>Created by Johnny Patrick | Hyper Retro Fun Edition 🕹️</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ===== Helpers =====
+  const $ = sel => document.querySelector(sel);
+  const el = id => document.getElementById(id);
+  const CONTENT = () => el('content');
+
+  // ===== Sidebar Toggle =====
+  const sidebar = el('sidebar');
+  const folderTab = el('folderTab');
+  let sidebarOpen = false;
+  folderTab.addEventListener('click', () => {
+    sidebarOpen = !sidebarOpen;
+    sidebar.style.left = sidebarOpen ? '0px' : '-260px';
+    folderTab.style.left = sidebarOpen ? '260px' : '0px';
+    if(window.innerWidth <= 768){ sidebar.style.display = sidebarOpen ? 'block' : 'none'; }
+  });
+
+  // ===== Clock =====
+  function updateClock(){ el('clock').innerText = new Date().toLocaleTimeString(); }
+  setInterval(updateClock, 1000); updateClock();
+
+  // ===== Toggle Sections =====
+  window.toggleSection = (h) => {
+    const next = h.nextElementSibling;
+    const isHidden = next.style.display === 'none';
+    next.style.display = isHidden ? 'block' : 'none';
+  };
+
+  // ===== Tabs State =====
+  let tabs = JSON.parse(localStorage.getItem('wikiboxTabs') || '[]');
+  if(tabs.length === 0) tabs = [{ id: Date.now(), title: 'Start', content: '' }];
+  let currentTab = 0;
+
+  function saveTabs(){ localStorage.setItem('wikiboxTabs', JSON.stringify(tabs)); }
+  function renderTabs(){
+    const tdiv = el('tabs'); tdiv.innerHTML = '';
+    tabs.forEach((t, i) => {
+      const tabEl = document.createElement('div');
+      tabEl.className = 'tab' + (i === currentTab ? ' active' : '');
+      tabEl.title = t.title;
+      tabEl.textContent = t.title || `Tab ${i+1}`;
+      // truncate long titles visually but keep tooltip
+      if(tabEl.textContent.length > 28) tabEl.textContent = tabEl.textContent.slice(0, 27) + '…';
+
+      const close = document.createElement('span');
+      close.className = 'close-tab';
+      close.textContent = '×';
+      close.onclick = (e) => { e.stopPropagation(); deleteTab(i); };
+
+      tabEl.appendChild(close);
+      tabEl.onclick = () => { currentTab = i; loadTab(); renderTabs(); };
+      tdiv.appendChild(tabEl);
+    });
+  }
+  function loadTab(){
+    CONTENT().style.transformOrigin = 'top left';
+    CONTENT().style.transform = `scale(${zoomLevel})`;
+    CONTENT().style.fontSize = currentTextSizePx() + 'px';
+    CONTENT().innerHTML = tabs[currentTab].content || '';
+    if(!tabs[currentTab].content) renderStartPage(); // default start page
+  }
+  function newTab(){
+    if(tabs.length >= 20) return;
+    tabs.push({ id: Date.now(), title: 'New Tab', content: '' });
+    currentTab = tabs.length - 1;
+    renderTabs(); loadTab(); saveTabs();
+  }
+  function deleteTab(i){
+    tabs.splice(i, 1);
+    if(tabs.length === 0) tabs = [{ id: Date.now(), title: 'Start', content: '' }];
+    currentTab = Math.min(currentTab, tabs.length - 1);
+    renderTabs(); loadTab(); saveTabs();
+  }
+  function closeAllTabs(){
+    tabs = [{ id: Date.now(), title: 'Start', content: '' }];
+    currentTab = 0;
+    renderTabs(); loadTab(); saveTabs();
+  }
+  window.newTab = newTab;
+  window.deleteTab = deleteTab;
+  window.closeAllTabs = closeAllTabs;
+
+  // ===== Zoom & Text =====
+  let zoomLevel = 1;
+  function zoomIn(){ zoomLevel += 0.15; CONTENT().style.transform = `scale(${zoomLevel})`; }
+  function zoomOut(){ zoomLevel = Math.max(0.5, zoomLevel - 0.15); CONTENT().style.transform = `scale(${zoomLevel})`; }
+  function resetZoom(){ zoomLevel = 1; CONTENT().style.transform = 'scale(1)'; }
+
+  function currentTextSizePx(){
+    const v = el('textSize')?.value || 'medium';
+    return v === 'small' ? 12 : v === 'large' ? 18 : 14;
+  }
+  function setTextSize(size){ CONTENT().style.fontSize = (size==='small'?12:size==='large'?18:14) + 'px'; }
+  function resetTextSize(){ el('textSize').value = 'medium'; setTextSize('medium'); }
+
+  window.zoomIn = zoomIn; window.zoomOut = zoomOut; window.resetZoom = resetZoom;
+  window.setTextSize = setTextSize; window.resetTextSize = resetTextSize;
+
+  // ===== History & Pinned =====
+  let historyList = JSON.parse(localStorage.getItem('wikiboxHistory') || '[]');
+  function addHistory(q){
+    const t = new Date().toLocaleString();
+    historyList.unshift({ query: q, time: t });
+    if(historyList.length > 60) historyList.pop();
+    localStorage.setItem('wikiboxHistory', JSON.stringify(historyList));
+    renderHistory();
+  }
+  function renderHistory(){
+    const hdiv = el('historyList'); hdiv.innerHTML = '';
+    historyList.forEach(h => {
+      const d = document.createElement('div');
+      d.textContent = `[${h.time}] ${h.query}`;
+      d.style.cursor = 'pointer';
+      d.onclick = () => { el('searchInput').value = h.query; search(); };
+      hdiv.appendChild(d);
+    });
+  }
+  function toggleHistory(){
+    const list = el('historyList');
+    list.style.display = (list.style.display === 'none') ? 'block' : 'none';
+  }
+  window.toggleHistory = toggleHistory;
+
+  let pinnedList = JSON.parse(localStorage.getItem('wikiboxPinned') || '[]');
+  function pinCurrentSearch(){
+    const q = el('searchInput').value.trim();
+    if(!q) return;
+    if(!pinnedList.includes(q)) pinnedList.unshift(q);
+    if(pinnedList.length > 40) pinnedList.pop();
+    localStorage.setItem('wikiboxPinned', JSON.stringify(pinnedList));
+    renderPinned();
+  }
+  function renderPinned(){
+    const pdiv = el('pinnedList'); pdiv.innerHTML = '';
+    pinnedList.forEach(p => {
+      const d = document.createElement('div');
+      d.textContent = p;
+      d.style.cursor = 'pointer';
+      d.onclick = () => { el('searchInput').value = p; search(); };
+      pdiv.appendChild(d);
+    });
+  }
+  window.pinCurrentSearch = pinCurrentSearch;
+
+  // ===== Start Page (Set/Go) =====
+  // Save a "start query" (string). If none, show random featured-like icons.
+  let startQuery = localStorage.getItem('wikiboxStartQuery') || '';
+  function setStartPage(){
+    const q = el('searchInput').value.trim();
+    if(!q){ alert('Type a query to set as Start Page.'); return; }
+    startQuery = q;
+    localStorage.setItem('wikiboxStartQuery', startQuery);
+    alert(`Start Page set to: "${startQuery}"`);
+  }
+  function goToStartPage(){
+    if(startQuery){
+      el('searchInput').value = startQuery;
+      search();
+      return;
+    }
+    // Otherwise render the default start page
+    tabs[currentTab].content = '';
+    renderStartPage();
+  }
+  window.setStartPage = setStartPage;
+  window.goToStartPage = goToStartPage;
+
+  // ===== Fun Buttons =====
+  const jokes = [
+    "Why did the computer show up at work late? It had a hard drive!",
+    "Why do programmers prefer dark mode? Because light attracts bugs!",
+    "There are only 10 kinds of people: those who understand binary and those who don’t."
+  ];
+  const facts = [
+    "Honey never spoils.",
+    "Sharks existed before trees.",
+    "The first computer bug was a real moth."
+  ];
+  function showJoke(){ popup(jokes[Math.floor(Math.random()*jokes.length)]); }
+  function rollDice(){ popup('🎲 You rolled a '+(Math.floor(Math.random()*6)+1)+'!'); }
+  function showFact(){ popup('🧠 ' + facts[Math.floor(Math.random()*facts.length)]); }
+  let clickGoal = 10, clickCount = 0;
+  function clickCounter(){
+    clickCount = 0;
+    const box = popup(`Click me ${clickGoal} times! (0/${clickGoal})`, true);
+    box.onclick = () => {
+      clickCount++;
+      box.innerHTML = `Clicks: ${clickCount}/${clickGoal}`;
+      if(clickCount >= clickGoal){
+        box.innerHTML = 'You win! 🎉';
+        confettiBlast();
+        setTimeout(()=>box.remove(), 1200);
+      }
+    };
+  }
+  function confettiBlast(){
+    for(let i=0;i<22;i++){
+      const c = document.createElement('div'); c.innerHTML = Math.random()>0.5?'🎊':'🎉';
+      c.style.position='fixed'; c.style.top=(Math.random()*85)+'%'; c.style.left=(Math.random()*85)+'%';
+      c.style.fontSize=(18+Math.random()*20)+'px'; c.style.transform=`rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(c); setTimeout(()=>c.remove(), 1600);
+    }
+  }
+  function popup(text, persist=false){
+    const p = document.createElement('div');
+    p.textContent = text;
+    Object.assign(p.style,{
+      position:'fixed', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+      background:'#fff', border:'3px solid #888', padding:'10px 14px',
+      boxShadow:'6px 6px 12px #aaa', zIndex:'999', borderRadius:'6px', fontSize:'14px'
+    });
+    document.body.appendChild(p);
+    if(!persist) setTimeout(()=>p.remove(), 2200);
+    return p;
+  }
+  window.showJoke = showJoke; window.rollDice = rollDice; window.showFact = showFact; window.clickCounter = clickCounter; window.confettiBlast = confettiBlast;
+
+  // ===== Suggestions (debounced, real Wikipedia) =====
+  const suggestBox = el('suggestionBox');
+  const searchInput = el('searchInput');
+  function debounce(fn, ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); }; }
+  async function fetchSuggestions(q){
+    if(!q){ suggestBox.style.display='none'; return; }
+    try{
+      const url = `https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=${encodeURIComponent(q)}&limit=7&namespace=0&format=json`;
+      const r = await fetch(url);
+      const data = await r.json();
+      const suggestions = data[1] || [];
+      suggestBox.innerHTML = '';
+      suggestions.forEach(s=>{
+        const item = document.createElement('div');
+        item.className = 'suggestion-item';
+        item.textContent = s;
+        item.onclick = () => { searchInput.value = s; suggestBox.style.display='none'; search(); };
+        suggestBox.appendChild(item);
+      });
+      suggestBox.style.display = suggestions.length ? 'block' : 'none';
+    }catch(e){ suggestBox.style.display='none'; }
+  }
+  const debouncedSuggest = debounce(()=>fetchSuggestions(searchInput.value.trim()), 180);
+  searchInput.addEventListener('input', debouncedSuggest);
+  document.addEventListener('click', (e) => {
+    if(!$('.address-bar').contains(e.target)) suggestBox.style.display='none';
+  });
+  el('searchBtn').addEventListener('click', ()=>search());
+  searchInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') search(); });
+
+  // ===== Wikipedia Search (with thumbnails) =====
+  async function search(){
+    const q = searchInput.value.trim();
+    if(!q) return;
+    addHistory(q);
+    tabs[currentTab].title = q;
+    renderTabs();
+
+    const contentDiv = CONTENT();
+    contentDiv.innerHTML = '<p>Loading results…</p>';
+
+    try{
+      // First, get search results to preserve ranking
+      const listUrl = `https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=${encodeURIComponent(q)}&srlimit=12&utf8=&format=json`;
+      const listResp = await fetch(listUrl);
+      const listData = await listResp.json();
+      const hits = (listData.query && listData.query.search) ? listData.query.search : [];
+
+      if(hits.length === 0){
+        contentDiv.innerHTML = `<h2>No results for "${q}"</h2>`;
+        tabs[currentTab].content = contentDiv.innerHTML; saveTabs(); return;
+      }
+
+      // Fetch details (extract + thumbnail) for these pageids
+      const ids = hits.map(h=>h.pageid).join('|');
+      const detailUrl = `https://en.wikipedia.org/w/api.php?origin=*&action=query&prop=pageimages|extracts&exintro&explaintext&exchars=500&piprop=thumbnail&pithumbsize=200&pageids=${ids}&format=json`;
+      const detailResp = await fetch(detailUrl);
+      const detailData = await detailResp.json();
+      const pages = detailData.query && detailData.query.pages ? detailData.query.pages : {};
+
+      contentDiv.innerHTML = '';
+      hits.forEach(h=>{
+        const p = pages[h.pageid] || {};
+        const imgSrc = p.thumbnail ? p.thumbnail.source : 'https://via.placeholder.com/160x100?text=No+Image';
+        const extract = (p.extract || '').replace(/\s+/g,' ').trim();
+        const snippet = extract || (h.snippet ? h.snippet.replace(/<[^>]*>/g,'') : 'No summary available.');
+
+        const row = document.createElement('div');
+        row.className = 'result';
+        row.innerHTML = `
+          <img src="${imgSrc}" alt="${p.title || h.title}">
+          <div>
+            <h3>${p.title || h.title}</h3>
+            <p>${snippet}</p>
+          </div>
+        `;
+        row.onclick = () => window.open(`https://en.wikipedia.org/?curid=${h.pageid}`, '_blank');
+        contentDiv.appendChild(row);
+      });
+
+      tabs[currentTab].content = contentDiv.innerHTML; saveTabs();
+    }catch(err){
+      console.error(err);
+      CONTENT().innerHTML = `<p>Error fetching results. ${err && err.message ? err.message : ''}</p>`;
+    }
+  }
+  window.search = search;
+
+  // ===== Start Page with real thumbnails =====
+  async function renderStartPage(){
+    const contentDiv = CONTENT();
+    contentDiv.innerHTML = '<div class="start-page" id="startPage"></div>';
+    const holder = el('startPage');
+
+    try{
+      // Random mainspace pages with thumbs & short extracts
+      const url = `https://en.wikipedia.org/w/api.php?origin=*&action=query&generator=random&grnnamespace=0&grnlimit=8&prop=pageimages|extracts&exintro&explaintext&exchars=140&piprop=thumbnail&pithumbsize=300&format=json`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const arr = data.query && data.query.pages ? Object.values(data.query.pages) : [];
+
+      if(arr.length === 0){ holder.innerHTML = '<p>Unable to load start items.</p>'; return; }
+
+      arr.forEach(p=>{
+        const img = p.thumbnail ? p.thumbnail.source : 'https://via.placeholder.com/300x180?text=Wikipedia';
+        const card = document.createElement('div');
+        card.className = 'start-icon';
+        card.innerHTML = `<img src="${img}" alt="${p.title}"><span title="${p.title}">${p.title}</span>`;
+        card.onclick = ()=>{ searchInput.value = p.title; search(); };
+        holder.appendChild(card);
+      });
+    }catch(e){
+      holder.innerHTML = '<p>Could not load start page.</p>';
+    }
+  }
+
+  // ===== Init =====
+  function init(){
+    renderTabs(); loadTab(); renderHistory(); renderPinned();
+  }
+  init();
+
+})();
+</script>
+</body>
+</html>
