@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>WikiBox Ultimate Retro 🎉</title>
 <style>
-/* ====== Base Styles ====== */
-html,body {
+/* ===== Base Styles ===== */
+html, body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -15,49 +15,31 @@ html,body {
   overflow: hidden;
 }
 
-/* ====== Window Styling ====== */
+/* ===== Window Layout ===== */
 .window {
   display: flex;
-  flex-direction: row;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
 }
 
 /* Sidebar */
 .sidebar {
   width: 220px;
   min-width: 200px;
+  max-width: 260px;
   background: #dcdcdc;
   border-right: 2px solid #999;
-  overflow-y: auto;
   padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-.sidebar h3 {
+.sidebar h2 {
+  font-size: 16px;
   margin-top: 0;
 }
 
-.pinned {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.pinned img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  cursor: pointer;
-  border-radius: 8px;
-  border: 2px solid #999;
-  transition: transform 0.2s;
-}
-
-.pinned img:hover {
-  transform: scale(1.05);
-}
-
-/* Main area */
+/* Main Content */
 .main {
   flex: 1;
   display: flex;
@@ -67,150 +49,72 @@ html,body {
 
 /* Search bar */
 .search-bar {
-  background: #eee;
-  padding: 8px;
-  display: flex;
-  gap: 5px;
-  align-items: center;
+  padding: 10px;
+  background: #e0e0e0;
   border-bottom: 2px solid #999;
 }
 
 .search-bar input {
-  flex: 1;
+  width: 100%;
   padding: 8px;
-  font-size: 1rem;
-}
-
-.search-bar button {
-  padding: 8px 12px;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  background: #0078d7;
-  color: white;
-  font-weight: bold;
-}
-
-.search-bar select {
-  padding: 6px;
+  border: 1px solid #777;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 /* Results */
 .results {
   flex: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: 10px;
   background: #fff;
 }
 
 .result {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
-}
-
-.result img {
-  max-width: 100%;
-  height: auto;
-  margin-bottom: 8px;
+  background: #f8f8f8;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  padding: 8px;
   border-radius: 6px;
 }
 
-/* ====== Mobile Support ====== */
+/* ===== Mobile Fixes ===== */
 @media (max-width: 768px) {
   .window {
     flex-direction: column;
   }
   .sidebar {
     width: 100%;
-    min-width: unset;
+    max-width: none;
     border-right: none;
     border-bottom: 2px solid #999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
-  .pinned {
-    justify-content: center;
-  }
-  .pinned img {
-    width: 70px;
-    height: 70px;
+  .main {
+    flex: 1;
+    width: 100%;
   }
 }
 </style>
 </head>
 <body>
-<div class="window">
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h3>Pinned Searches</h3>
-    <div class="pinned" id="pinned"></div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main">
-    <div class="search-bar">
-      <input type="text" id="query" placeholder="Search WikiBox..." />
-      <select id="mode">
-        <option value="casual">Casual</option>
-        <option value="educational">Educational</option>
-      </select>
-      <button onclick="search()">Go</button>
+  <div class="window">
+    <div class="sidebar">
+      <h2>Pinned Searches 📌</h2>
+      <ul>
+        <li>Science</li>
+        <li>History</li>
+        <li>Math</li>
+        <li>Technology</li>
+      </ul>
     </div>
-    <div class="results" id="results"></div>
+    <div class="main">
+      <div class="search-bar">
+        <input type="text" placeholder="Search WikiBox..." />
+      </div>
+      <div class="results">
+        <div class="result">Search results will appear here…</div>
+      </div>
+    </div>
   </div>
-</div>
-
-<script>
-async function search() {
-  const query = document.getElementById("query").value;
-  const mode = document.getElementById("mode").value;
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.innerHTML = "<p>Loading...</p>";
-
-  let url;
-  if (mode === "educational") {
-    url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageimages|extracts&exintro&explaintext&generator=search&gsrsearch=${query} site:khanacademy.org&gsrlimit=5&piprop=thumbnail&pithumbsize=300`;
-  } else {
-    url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageimages|extracts&exintro&explaintext&generator=search&gsrsearch=${query}&gsrlimit=5&piprop=thumbnail&pithumbsize=300`;
-  }
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (!data.query) {
-      resultsDiv.innerHTML = "<p>No results found.</p>";
-      return;
-    }
-
-    resultsDiv.innerHTML = "";
-    Object.values(data.query.pages).forEach(page => {
-      const div = document.createElement("div");
-      div.className = "result";
-      div.innerHTML = `
-        ${page.thumbnail ? `<img src="${page.thumbnail.source}" alt="thumbnail">` : ""}
-        <h3><a href="https://en.wikipedia.org/?curid=${page.pageid}" target="_blank">${page.title}</a></h3>
-        <p>${page.extract || "No description available."}</p>
-      `;
-      resultsDiv.appendChild(div);
-    });
-
-    // Save pinned search
-    const pinned = document.getElementById("pinned");
-    const img = document.createElement("img");
-    img.src = Object.values(data.query.pages)[0]?.thumbnail?.source || "https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg";
-    img.onclick = () => {
-      document.getElementById("query").value = query;
-      search();
-    };
-    pinned.appendChild(img);
-
-  } catch (err) {
-    resultsDiv.innerHTML = "<p>Error loading results.</p>";
-  }
-}
-</script>
 </body>
 </html>
-
